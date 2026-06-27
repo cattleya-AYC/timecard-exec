@@ -330,7 +330,7 @@
 <script>
 // ========== Supabase設定 ==========
 const SUPABASE_URL = "https://zxdgiszrsmumjjxmvszb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZGdpc3pyc211bWpqeG12c3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA2MTExMzEsImV4cCI6MjA0NjE4NzEzMX0.1mMDMBRSMuKDOSB1lGQmFr1dk-WNChZgopJbgPImxPU";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZGdpc3pyc211bWpqeG12c3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2ODM2MTksImV4cCI6MjA5NTI1OTYxOX0.vNndS7JEzIUsa007EPO2zRoYhUr-z01LM32BKIhMSz4";
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -376,23 +376,12 @@ async function fetchOrders() {
 function renderTables() {
   const container = document.getElementById("tables-container");
 
-  // 数字テーブル（1-15）
-  const numTables = TABLE_IDS.filter(t => !isNaN(t));
-  // アルファベットテーブル
-  const alphaTables = TABLE_IDS.filter(t => isNaN(t));
-
   container.innerHTML = `
-    <div class="section-label">テーブル席</div>
-    <div class="table-grid" id="grid-num"></div>
-    <div class="section-label">カウンター席</div>
-    <div class="table-grid" id="grid-alpha"></div>
+    <div class="table-grid" id="grid-all"></div>
   `;
 
-  numTables.forEach(t => {
-    document.getElementById("grid-num").appendChild(makeCard(t));
-  });
-  alphaTables.forEach(t => {
-    document.getElementById("grid-alpha").appendChild(makeCard(t));
+  TABLE_IDS.forEach(t => {
+    document.getElementById("grid-all").appendChild(makeCard(t));
   });
 }
 
