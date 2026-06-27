@@ -22,7 +22,7 @@
 <body>
  <main class="wrap">
   <header class="head"><h1>カトレア　経営者専用</h1><p>日々の運営状況を確認する管理ページ</p></header>
-  <div class="notice"><b>毎日の確認順：</b>① 退勤打刻　→　② テーブルの滞留・会計状況　→　③ 厨房の未提供注文<br><b>月末：</b>月集計・銀行入金額を確認。<br><b>注意：</b>詳細確認ページでは、<b>緑色のボタンを絶対に押さないでください。</b><br><b>カウントアプリ：</b>入力するとデータが保存されるため、<b>打ち込まないでください。</b><br><b>注文練習・シフトアプリ：</b>データは保存されないため、自由に操作・入力できます。</div>
+  <div class="notice"><b>毎日の確認順：</b>① 退勤打刻　→　② テーブルの滞留・会計状況　→　③ 厨房の未提供注文<br><b>月末：</b>月集計・銀行入金額を確認。<br><b>注意：</b>詳細確認ページでは、<b>緑色のボタンを絶対に押さないでください。</b><br><b>現金確認アプリ：</b>入力しても保存・送信されません。自由に入力して、現金合計や差額を確認できます。<br><b>注文練習・シフトアプリ：</b>データは保存されないため、自由に操作・入力できます。</div>
   <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="false" aria-controls="systemGuide">このページの仕組みを読む <span id="guideMark">＋</span></button>
   <section class="guide" id="systemGuide" aria-hidden="true">
    <h2>注文から会計までの流れ</h2>
@@ -42,7 +42,7 @@
    <a class="card" href="https://cattleya-order.vercel.app/kitchen.html"><div class="icon">🍳</div><div class="tag">KITCHEN</div><h2>厨房モニター</h2><p>未提供の注文、提供待ちの状況を確認します。</p></a>
    <a class="card" href="https://cattleya-order.vercel.app/Monthly.html"><div class="icon">▤</div><div class="tag">MONTHLY REPORT</div><h2>月集計・銀行入金額</h2><p>月ごとの売上集計と、銀行への入金額を確認します。</p></a>
    <a class="card warning" href="https://cattleya-order.vercel.app/Analytics.html"><div class="icon">⌁</div><div class="tag">DETAIL ANALYTICS</div><h2>詳細確認</h2><p><b>緑色のボタンは絶対に押さないでください。</b><br>売上・注文データの詳細確認用です。</p></a>
-   <a class="card warning" href="https://cattleya-order.vercel.app/Cash.html"><div class="icon">#</div><div class="tag">COUNT APP</div><h2>カウントアプリ</h2><p><b>打ち込まないでください。</b><br>入力内容がそのままデータとして保存されます。確認のみ行ってください。</p></a>
+   <a class="card warning" href="https://timecard-exec.vercel.app/Cash_view.html"><div class="icon">💴</div><div class="tag">CASH CHECK</div><h2>現金確認アプリ</h2><p><b>入力しても保存・送信されません。</b><br>自由に入力して、現金合計や差額を確認できます。記録履歴は閲覧のみです。</p></a>
    <a class="card practice" href="https://cattleya-order.vercel.app/practice.html"><div class="icon">✎</div><div class="tag">ORDER PRACTICE</div><h2>注文練習アプリ</h2><p>データは保存されません。自由に打ち込み、送信して練習してください。</p></a>
    <a class="card practice" href="https://timecard-owner.vercel.app/shift.html"><div class="icon">▤</div><div class="tag">SHIFT SIMULATOR</div><h2>シフトアプリ</h2><p>データは保存されません。自由にシフトを考え、理想のシフトが完成したらスクリーンショットを共有してください。</p></a>
   </section>
