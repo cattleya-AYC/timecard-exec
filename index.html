@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#5B4BB5">
+<title>カトレア 給与（役員）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",sans-serif;background:#f5f5f5;color:#333;}
+  .top{background:#5B4BB5;color:#fff;padding:16px;text-align:center;position:relative;}
+  .top h1{font-size:18px;font-weight:600;}
+  .monthbar{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;background:#fff;border-bottom:1px solid #e0e0e0;}
+  .monthbar button{background:none;border:none;font-size:18px;cursor:pointer;padding:4px 8px;}
+  .monthbar .ml{font-size:14px;font-weight:600;min-width:120px;text-align:center;}
+  .totalcard{background:#fff;margin:12px;padding:16px;border-radius:8px;border-left:4px solid #5B4BB5;}
+  .totalcard .l{font-size:13px;color:#666;}
+  .totalcard .v{font-size:24px;font-weight:700;color:#5B4BB5;margin-top:4px;}
+  .listbtn{padding:0 12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;}
+  .btn.primary{background:#5B4BB5;color:#fff;}
+  .btn.ghost{background:#f0f0f0;color:#333;}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .list{padding:8px 12px;}
+  .srow{display:flex;align-items:center;gap:12px;padding:12px;background:#fff;margin-bottom:8px;border-radius:8px;cursor:pointer;}
+  .srow:active{background:#f9f9f9;}
+  .pic{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+  .pic.silh{background:#e8e8e8;display:flex;align-items:center;justify-content:center;}
+  .pic.silh svg{width:36px;height:36px;fill:#999;}
+  .info{flex:1;}
+  .info .nm{font-weight:600;font-size:14px;}
+  .info .sub{font-size:12px;color:#666;margin-top:2px;}
+  .pay{text-align:right;}
+  .pay .amt{font-size:16px;font-weight:700;color:#333;}
+  .pay .arrow{font-size:12px;color:#999;}
+  .sheet{position:fixed;inset:0;background:#f5f5f5;display:none;flex-direction:column;z-index:10;}
+  .sheet.show{display:flex;animation:slideUp 0.3s ease-out;}
+  @keyframes slideUp{from{transform:translateY(100%);} to{transform:translateY(0);}}
+  .shead{background:#fff;border-bottom:1px solid #e0e0e0;padding:12px;}
+  .shead .in{display:flex;align-items:center;gap:12px;}
+  .shead .back{background:none;border:none;font-size:24px;cursor:pointer;}
+  .shead h2{font-size:16px;font-weight:600;}
+  .sheet .body{flex:1;overflow-y:auto;padding:12px;}
+  .daytable{margin-top:12px;border:1px solid #ddd;border-radius:4px;overflow:hidden;}
+  .daytable .h{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;background:#5B4BB5;color:#fff;padding:8px;font-weight:600;font-size:12px;}
+  .daytable .d{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:8px;border-top:1px solid #ddd;font-size:12px;align-items:center;}
+  .daily3col .h{grid-template-columns:1.5fr 1fr 1fr !important;}
+  .daily3col .d{grid-template-columns:1.5fr 1fr 1fr !important;}
+  .daily-total{background:#f0eeff;font-weight:600;border-top:2px solid #5B4BB5 !important;}
+  .calc{margin-top:12px;padding:12px;background:#f9f9f9;border-radius:4px;}
+  .calc .line{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;}
+  .calc .line.total{font-weight:600;border-top:1px solid #ddd;padding-top:8px;font-size:15px;}
+  .calc .line span:last-child{font-weight:600;}
+  .synctag{position:fixed;bottom:12px;right:12px;font-size:11px;color:#999;z-index:5;}
+  #printView{position:fixed;inset:0;background:#f5f5f5;display:none;flex-direction:column;z-index:20;}
+  #printView.show{display:flex;}
+  .pv-head{background:#5B4BB5;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0;}
+  .pv-head button{background:#fff;color:#5B4BB5;border:none;padding:8px 16px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;}
+  .pv-body{flex:1;overflow-y:auto;padding:12px;background:#f5f5f5;}
+  .slip{background:#fff;padding:24px;max-width:600px;margin:0 auto;border-radius:8px;}
+  .slip h2{text-align:center;font-size:16px;margin-bottom:16px;}
+  .slip .co{text-align:center;font-weight:600;margin-bottom:4px;}
+  .slip .meta{text-align:center;font-size:12px;color:#666;display:flex;justify-content:space-around;margin-bottom:16px;}
+  .slip table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+  .slip table th,.slip table td{padding:8px;border:1px solid #ddd;text-align:left;font-size:12px;}
+  .slip table th{background:#f0f0f0;font-weight:600;}
+  .slip table .tot{background:#f9f9f9;font-weight:600;}
+  .slip table .r{text-align:right;}
+  .no-out{color:#e05000;font-size:11px;}
+  .badge{display:inline-block;background:#5B4BB5;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+  @media print{
+    body > *{display:none !important;}
+    #printView{display:block !important;position:static !important;}
+    #printView .pv-head{display:none !important;}
+    .pv-body{overflow:visible !important;padding:0 !important;}
+    .slip{max-width:none !important;padding:0 !important;}
+    .slip *{color:#000 !important;}
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>給与（役員）<span class="badge">閲覧専用</span></h1>
+</div>
+<div class="monthbar">
+  <button onclick="moveMonth(-1)">&lsaquo;</button>
+  <div class="ml" id="mlabel">----年--月</div>
+  <button id="mnext" onclick="moveMonth(1)">&rsaquo;</button>
+</div>
+<div class="totalcard">
+  <div class="l">当月 支給合計（見込み）</div>
+  <div class="v" id="grandTotal">¥0</div>
+</div>
+<div class="listbtn">
+  <button class="btn ghost" id="btnListPrint" onclick="openListPrint()">月間 給与一覧表（PDF）</button>
+  <button class="btn ghost" id="btnDailySheet" onclick="openDailySheet()">日別集計</button>
+</div>
+<div class="list" id="list"></div>
+
+<div class="sheet" id="detailSheet">
+  <div class="shead"><div class="in"><button class="back" onclick="closeDetail()">&lsaquo; 戻る</button><h2 id="dName"></h2></div></div>
+  <div class="body" id="detailBody"></div>
+</div>
+
+<div class="sheet" id="dailySheet">
+  <div class="shead"><div class="in"><button class="back" onclick="closeDailySheet()">&lsaquo; 戻る</button><h2 id="dailyTitle">日別集計</h2></div></div>
+  <div class="body" id="dailyBody"></div>
+</div>
+
+<div id="printView">
+  <div class="pv-head">
+    <button onclick="closePrint()">&#8592; 戻る</button>
+    <span id="pvTitle" style="font-weight:600;">明細</span>
+    <button onclick="doPrint()">印刷 / PDF</button>
+  </div>
+  <div class="pv-body"><div class="slip" id="slip"></div></div>
+</div>
+<div class="synctag" id="synctag"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+import{getFirestore,collection,getDocs,query,where,doc,getDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyA0P2xZW4uXbBL4dOFhuYLoFuXPAz68Ef4",
+  authDomain:"cattleya-timecard.firebaseapp.com",
+  projectId:"cattleya-timecard",
+  storageBucket:"cattleya-timecard.firebasestorage.app",
+  messagingSenderId:"308051028432",
+  appId:"1:308051028432:web:f84c12cd3114878982f1d5"
+};
+const app=initializeApp(FIREBASE_CONFIG);
+const db=getFirestore(app);
+
+const LS_SET="sett_",LS_PHOTO="phot_";
+const STAFF=[
+  {id:"tencho",name:"店長",photo:null},
+  {id:"chief",name:"チーフ",photo:null},
+  {id:"sasaki",name:"佐々木",photo:null},
+  {id:"shirota",name:"城田",photo:null},
+  {id:"miyagawa",name:"宮川",photo:null},
+  {id:"ibuchi",name:"井渕",photo:null},
+  {id:"suenaga",name:"末永",photo:null},
+  {id:"help",name:"ヘルプ",photo:null},
+];
+const DEFAULT_RATE=1330,DEFAULT_BREAK=30;
+const WD=["日","月","火","水","木","金","土"];
+const TDEFS={
+  "tencho":{transType:"monthly",transport:6950,dailyAllow:1500},
+  "chief":{transType:"monthly",transport:12390,dailyAllow:1190},
+  "sasaki":{transType:"daily",transport:0,dailyAllow:0},
+  "shirota":{transType:"daily",transport:0,dailyAllow:0},
+  "miyagawa":{transType:"monthly",transport:5620,dailyAllow:0},
+  "ibuchi":{transType:"daily",transport:0,dailyAllow:0},
+  "suenaga":{transType:"daily",transport:0,dailyAllow:0},
+  "help":{transType:"daily",transport:0,dailyAllow:0},
+};
+
+let settings={};
+let viewY,viewM,monthData={},dataLoaded=false;
+
+function loadLS(k){try{return JSON.parse(localStorage.getItem(k))||{};}catch{return{};}}
+
+function getSetting(id){
+  const s=settings[id]||{};const td=TDEFS[id]||{};
+  return{
+    rate:s.rate!==undefined?s.rate:DEFAULT_RATE,
+    allowance:s.allowance!==undefined?s.allowance:0,
+    dailyAllow:s.dailyAllow!==undefined?s.dailyAllow:(td.dailyAllow||0),
+    transport:s.transport!==undefined?s.transport:(td.transport||0),
+    transType:s.transType||td.transType||"monthly",
+    brk:s.brk!==undefined?s.brk:DEFAULT_BREAK
+  };
+}
+function transAmount(set,wd){return set.transType==="daily"?(set.transport||0)*wd:(set.transport||0);}
+function dailyAllowAmt(set,wd){return(set.dailyAllow||0)*wd;}
+function roundIn(d){const x=new Date(d);x.setMinutes(Math.ceil(x.getMinutes()/15)*15,0,0);return x;}
+function roundOut(d){const x=new Date(d);x.setMinutes(Math.floor(x.getMinutes()/15)*15,0,0);return x;}
+function durStr(min){if(min<=0)return"0:00";return Math.floor(min/60)+":"+String(min%60).padStart(2,"0");}
+function hm(d){return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function yen(n){return"¥"+Math.round(n).toLocaleString("ja-JP");}
+
+async function getMonthRecords(y,m){
+  const prefix=`${y}-${String(m+1).padStart(2,"0")}`;
+  const q=query(collection(db,"records"),where("dateKey",">=",prefix+"-01"),where("dateKey","<=",prefix+"-31"));
+  const snap=await getDocs(q);const arr=[];snap.forEach(d=>arr.push(d.data()));return arr;
+}
+
+function computeStaff(recs){
+  const map={};
+  for(const r of recs){
+    if(!map[r.staffId])map[r.staffId]={days:{},name:r.staffName};
+    const d=map[r.staffId].days;if(!d[r.dateKey])d[r.dateKey]={ins:[],outs:[]};
+    (r.type==="in"?d[r.dateKey].ins:d[r.dateKey].outs).push(r);
+  }
+  for(const id in map){
+    let totalMin=0,workDays=0;const dayList=[];
+    const brk=getSetting(id).brk;
+    Object.keys(map[id].days).sort().forEach(dk=>{
+      const day=map[id].days[dk];
+      const fi=day.ins.length?new Date(Math.min(...day.ins.map(r=>new Date(r.time)))):null;
+      const lo=day.outs.length?new Date(Math.max(...day.outs.map(r=>new Date(r.time)))):null;
+      let gross=0,min=0;
+      if(fi&&lo){gross=Math.max(0,Math.round((roundOut(lo)-roundIn(fi))/60000));min=Math.max(0,gross-brk);}
+      if(gross>0){totalMin+=min;workDays++;}
+      dayList.push({dk,fi,lo,min,gross});
+    });
+    map[id].totalMin=totalMin;map[id].workDays=workDays;map[id].dayList=dayList;
+  }
+  return map;
+}
+
+function computeDailyTotals(recs){
+  const dm={};
+  for(const r of recs){
+    if(!dm[r.dateKey])dm[r.dateKey]={staffList:[]};
+    let s=dm[r.dateKey].staffList.find(x=>x.staffId===r.staffId);
+    if(!s){s={staffId:r.staffId,ins:[],outs:[]};dm[r.dateKey].staffList.push(s);}
+    (r.type==="in"?s.ins:s.outs).push(r);
+  }
+  const result=[];
+  for(const dk in dm){
+    let totalMin=0,staffCount=0;
+    dm[dk].staffList.forEach(s=>{
+      const fi=s.ins.length?new Date(Math.min(...s.ins.map(r=>new Date(r.time)))):null;
+      const lo=s.outs.length?new Date(Math.max(...s.outs.map(r=>new Date(r.time)))):null;
+      if(fi&&lo){
+        const gross=Math.max(0,Math.round((roundOut(lo)-roundIn(fi))/60000));
+        const min=Math.max(0,gross-getSetting(s.staffId).brk);
+        if(gross>0){totalMin+=min;staffCount++;}
+      }
+    });
+    result.push({dateKey:dk,totalMin,staffCount});
+  }
+  return result.sort((a,b)=>a.dateKey.localeCompare(b.dateKey));
+}
+
+async function render(){
+  dataLoaded=false;
+  document.getElementById("btnListPrint").disabled=true;
+  document.getElementById("btnDailySheet").disabled=true;
+  document.getElementById("mlabel").textContent=`${viewY}年${viewM+1}月`;
+  const now=new Date();
+  document.getElementById("mnext").disabled=(viewY===now.getFullYear()&&viewM===now.getMonth());
+  const recs=await getMonthRecords(viewY,viewM);
+  monthData=computeStaff(recs);
+  const list=document.getElementById("list");list.innerHTML="";
+  let grand=0;
+  for(const s of STAFF){
+    const d=monthData[s.id];const set=getSetting(s.id);
+    const totalMin=d?d.totalMin:0,workDays=d?d.workDays:0;
+    const base=(totalMin/60)*set.rate;
+    const pay=base+set.allowance+dailyAllowAmt(set,workDays)+transAmount(set,workDays);
+    grand+=pay;
+    const row=document.createElement("div");row.className="srow";
+    row.innerHTML=`
+      <div class="pic silh"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4 0-9 2-9 6v2h18v-2c0-4-5-6-9-6z"/></svg></div>
+      <div class="info"><div class="nm">${s.name}</div>
+      <div class="sub">${workDays}日・${durStr(totalMin)}h・時給${set.rate}円</div></div>
+      <div class="pay"><div class="amt">${yen(pay)}</div><div class="arrow">詳細 &rsaquo;</div></div>`;
+    row.onclick=()=>openDetail(s);
+    list.appendChild(row);
+  }
+  document.getElementById("grandTotal").innerHTML=yen(grand);
+  dataLoaded=true;
+  document.getElementById("btnListPrint").disabled=false;
+  document.getElementById("btnDailySheet").disabled=false;
+}
+
+window.moveMonth=function(n){
+  let m=viewM+n,y=viewY;
+  if(m<0){m=11;y--;}if(m>11){m=0;y++;}
+  const now=new Date();if(y>now.getFullYear()||(y===now.getFullYear()&&m>now.getMonth()))return;
+  viewM=m;viewY=y;render();
+};
+
+window.openDailySheet=async function(){
+  if(!dataLoaded)return;
+  document.getElementById("dailyTitle").textContent=`${viewY}年${viewM+1}月 日別集計`;
+  const recs=await getMonthRecords(viewY,viewM);
+  const data=computeDailyTotals(recs);
+  let cumMin=0,cumStaff=0;
+  let html=`<div class="daytable daily3col"><div class="h"><div>日付</div><div>人数</div><div>合計時間</div></div>`;
+  if(data.length===0){
+    html+=`</div><p style="text-align:center;color:#999;padding:20px;">この月のデータなし</p>`;
+  }else{
+    data.forEach(d=>{
+      const dt=new Date(d.dateKey+"T00:00:00");
+      const lbl=`${dt.getMonth()+1}/${dt.getDate()}(${WD[dt.getDay()]})`;
+      cumMin+=d.totalMin;cumStaff+=d.staffCount;
+      html+=`<div class="d"><div>${lbl}</div><div>${d.staffCount}人</div><div>${durStr(d.totalMin)}</div></div>`;
+    });
+    html+=`<div class="d daily-total"><div>累計 ${data.length}日</div><div>${cumStaff}人日</div><div>${durStr(cumMin)}</div></div></div>`;
+  }
+  document.getElementById("dailyBody").innerHTML=html;
+  document.getElementById("dailySheet").classList.add("show");
+};
+window.closeDailySheet=function(){document.getElementById("dailySheet").classList.remove("show");};
+
+let curStaff=null;
+
+window.openDetail=async function(s){
+  curStaff=s;
+  const recs=await getMonthRecords(viewY,viewM);
+  monthData=computeStaff(recs);
+  const set=getSetting(s.id);const d=monthData[s.id];
+  document.getElementById("dName").textContent=`${s.name}・${viewY}年${viewM+1}月`;
+  let dayRows="";
+  if(d&&d.dayList.length){
+    dayRows=`<div class="daytable">
+      <div class="h"><div>日</div><div>出勤</div><div>退勤</div><div>時間</div></div>`;
+    d.dayList.forEach(x=>{
+      const dt=new Date(x.dk+"T00:00:00");
+      const lbl=`${dt.getDate()}(${WD[dt.getDay()]})`;
+      const timeCell=(x.fi&&x.lo)?(x.min?durStr(x.min):"—"):`<span class="no-out">${x.fi?"退勤待":"未出勤"}</span>`;
+      dayRows+=`<div class="d"><div>${lbl}</div><div>${x.fi?hm(x.fi):"—"}</div><div>${x.lo?hm(x.lo):"—"}</div><div>${timeCell}</div></div>`;
+    });
+    dayRows+=`</div>`;
+  }else{dayRows=`<p style="text-align:center;color:#999;padding:20px;">この月の勤務記録なし</p>`;}
+
+  const totalMin=d?d.totalMin:0,workDays=d?d.workDays:0;
+  const base=(totalMin/60)*set.rate;
+  const transTotal=set.transType==="daily"?set.transport*workDays:set.transport;
+  const dailyAllowTotal=set.dailyAllow*workDays;
+  const total=base+set.allowance+dailyAllowTotal+transTotal;
+  const daRow=set.dailyAllow>0?`<div class="line"><span>日当手当(${yen(set.dailyAllow)}/日×${workDays}日)</span><b>${yen(dailyAllowTotal)}</b></div>`:"";
+
+  document.getElementById("detailBody").innerHTML=`
+    ${dayRows}
+    <div class="calc">
+      <div class="line"><span>勤務日数</span><b>${workDays}日</b></div>
+      <div class="line"><span>勤務時間（休憩控除・15分集計）</span><b>${durStr(totalMin)}</b></div>
+      <div class="line"><span>基本給(${set.rate}円×${(totalMin/60).toFixed(2)}h)</span><b>${yen(base)}</b></div>
+      <div class="line"><span>手当（月額固定）</span><b>${yen(set.allowance)}</b></div>
+      ${daRow}
+      <div class="line"><span>交通費${set.transType==="daily"?`(${yen(set.transport)}×${workDays}日)`:"（定期）"}</span><b>${yen(transTotal)}</b></div>
+      <div class="line total"><span>支給合計</span><span>${yen(total)}</span></div>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="btn primary" style="width:100%;padding:14px;font-size:15px;" onclick="openPrint()">給与明細を表示 / PDF</button>
+    </div>`;
+  document.getElementById("detailSheet").classList.add("show");
+};
+
+window.closeDetail=function(){document.getElementById("detailSheet").classList.remove("show");render();};
+
+window.openPrint=function(){
+  const set=getSetting(curStaff.id);const d=monthData[curStaff.id];
+  const totalMin=d?d.totalMin:0,workDays=d?d.workDays:0;
+  const base=(totalMin/60)*set.rate;
+  const transTotal=set.transType==="daily"?set.transport*workDays:set.transport;
+  const dailyAllowTotal=set.dailyAllow*workDays;
+  const total=base+set.allowance+dailyAllowTotal+transTotal;
+  let rows="";
+  if(d)d.dayList.forEach(x=>{
+    if(!x.fi)return;
+    const dt=new Date(x.dk+"T00:00:00");
+    rows+=`<tr><td>${dt.getDate()}(${WD[dt.getDay()]})</td><td class="r">${x.fi?hm(x.fi):"—"}</td><td class="r">${x.lo?hm(x.lo):"—"}</td><td class="r">${x.min?durStr(x.min):"—"}</td></tr>`;
+  });
+  if(!rows)rows=`<tr><td colspan="4" style="text-align:center;padding:14px;">勤務記録なし</td></tr>`;
+  document.getElementById("slip").innerHTML=`
+    <h2>勤怠明細</h2>
+    <div class="co">ラウンジ カトレア（株式会社エー・ワイ・シー）</div>
+    <div class="meta"><span>${viewY}年${viewM+1}月分</span><span>${curStaff.name} 様</span></div>
+    <table>
+      <tr><th>日</th><th class="r">出勤</th><th class="r">退勤</th><th class="r">時間</th></tr>
+      ${rows}
+      <tr class="tot"><td>勤務 ${workDays}日</td><td></td><td class="r">合計</td><td class="r">${durStr(totalMin)}</td></tr>
+    </table>
+    <table style="margin-top:12px;">
+      <tr><th>項目</th><th class="r">金額</th></tr>
+      <tr><td>基本給</td><td class="r">${yen(base)}</td></tr>
+      ${set.allowance>0?`<tr><td>手当（月額）</td><td class="r">${yen(set.allowance)}</td></tr>`:""}
+      ${dailyAllowTotal>0?`<tr><td>日当手当</td><td class="r">${yen(dailyAllowTotal)}</td></tr>`:""}
+      ${transTotal>0?`<tr><td>交通費</td><td class="r">${yen(transTotal)}</td></tr>`:""}
+      <tr class="tot"><td>支給合計</td><td class="r">${yen(total)}</td></tr>
+    </table>
+    <p style="margin-top:24px;font-size:12px;">発行日：${new Date().toLocaleDateString("ja-JP")}</p>`;
+  document.getElementById("pvTitle").textContent=`${curStaff.name} 勤怠明細`;
+  document.getElementById("printView").classList.add("show");
+};
+
+window.openListPrint=function(){
+  if(!dataLoaded)return;
+  let html=`<h2>給与一覧表（${viewY}年${viewM+1}月）</h2>
+    <div class="co" style="margin-bottom:12px;">ラウンジ カトレア（株式会社エー・ワイ・シー）</div>
+    <table><tr><th>氏名</th><th>勤務日数</th><th>勤務時間</th><th class="r">支給額</th></tr>`;
+  let grand=0;
+  for(const s of STAFF){
+    const d=monthData[s.id];const set=getSetting(s.id);
+    const totalMin=d?d.totalMin:0,workDays=d?d.workDays:0;
+    const base=(totalMin/60)*set.rate;
+    const pay=base+set.allowance+dailyAllowAmt(set,workDays)+transAmount(set,workDays);
+    grand+=pay;
+    html+=`<tr><td>${s.name}</td><td>${workDays}日</td><td>${durStr(totalMin)}</td><td class="r">${yen(pay)}</td></tr>`;
+  }
+  html+=`<tr class="tot"><td>合計</td><td></td><td></td><td class="r">${yen(grand)}</td></tr></table>
+    <p style="margin-top:24px;font-size:12px;">発行日：${new Date().toLocaleDateString("ja-JP")}</p>`;
+  document.getElementById("slip").innerHTML=html;
+  document.getElementById("pvTitle").textContent=`${viewY}年${viewM+1}月 給与一覧`;
+  document.getElementById("printView").classList.add("show");
+};
+
+window.closePrint=function(){document.getElementById("printView").classList.remove("show");};
+window.doPrint=function(){window.print();};
+
+const flash=(msg)=>{const t=document.getElementById("synctag");t.textContent=msg;setTimeout(()=>t.textContent="",3000);};
+
+(async()=>{
+  try{
+    const s=await getDoc(doc(db,"settings","payroll"));
+    if(s.exists())settings={...settings,...s.data()};
+  }catch(e){}
+  const now=new Date();viewY=now.getFullYear();viewM=now.getMonth();
+  await render();
+})();
+</script>
+</body>
+</html>
