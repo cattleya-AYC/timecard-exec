@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>カトレア｜経営者専用</title>
+  <style>
+    :root{--ink:#25221e;--muted:#6c655d;--paper:#fbfaf7;--line:#ded8cf;--gold:#9a7a31;--gold2:#d7bd7c;--shadow:0 10px 28px rgba(43,35,24,.10)}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(135deg,#f5f0e7,#fcfbf8);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}
+    .wrap{max-width:920px;margin:auto;padding:28px 18px 44px}.head{border-left:5px solid var(--gold);padding:3px 0 3px 14px;margin:4px 0 24px}.head h1{margin:0;font-family:Georgia,"Hiragino Mincho ProN",serif;font-size:26px;letter-spacing:.05em}.head p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .notice{background:#fff8e8;border:1px solid #ead8a7;border-radius:14px;padding:14px 16px;margin-bottom:18px;font-size:14px;line-height:1.6}.notice b{color:#765d19}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{position:relative;display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:18px;padding:22px 18px 19px;min-height:198px;box-shadow:var(--shadow);overflow:hidden;transition:transform .15s ease,box-shadow .15s ease}.card:active{transform:scale(.985)}.warning{border-color:#d7b66b;background:#fffdf7}.warning h2{color:#7a5810}.warning p b{color:#a33b2e}.practice{border-color:#b9d4c2;background:#fbfffc}.practice h2{color:#2e6c46}.disabled{cursor:default;opacity:.92}.disabled:after{content:"設定待ち";font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:11px;letter-spacing:.06em;bottom:17px;color:#8a8377}.disabled:active{transform:none}.card:after{content:"›";position:absolute;right:15px;bottom:10px;font-family:Georgia,serif;font-size:30px;color:var(--gold)}.icon{font-size:34px;line-height:1;margin-bottom:17px}.tag{font-size:11px;letter-spacing:.09em;color:var(--gold);font-weight:700}.card h2{font-size:20px;margin:6px 0 9px}.card p{font-size:13px;line-height:1.65;color:var(--muted);margin:0;padding-right:12px}.section{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin:30px 0 10px}.subgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.subcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px}.subcard h3{font-size:15px;margin:0 0 7px}.subcard p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}.footer{text-align:center;color:#92897c;font-size:11px;margin-top:28px}
+    .guide-toggle{width:100%;border:1px solid #c9af73;background:#fffdf8;border-radius:14px;padding:15px 18px;text-align:left;color:var(--ink);font:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 5px 16px rgba(43,35,24,.06);margin-bottom:16px}.guide-toggle span{float:right;color:var(--gold);font-size:20px;line-height:.8}.guide{display:none;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:18px;padding:20px 18px 18px;margin:-4px 0 18px;box-shadow:var(--shadow)}.guide.open{display:block}.guide h2{font-size:19px;margin:0 0 8px}.guide .lead{font-size:13px;line-height:1.7;color:var(--muted);margin:0 0 16px}.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:stretch}.flow-step{border:1px solid #e4ddd2;border-radius:13px;background:#fff;padding:14px 12px}.flow-step .flow-icon{font-size:28px;line-height:1;margin-bottom:8px}.flow-step h3{margin:0 0 6px;font-size:15px}.flow-step p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.arrow{align-self:center;color:var(--gold);font-size:26px}.guide-note{margin-top:13px;background:#fff8e8;border:1px solid #ead8a7;border-radius:12px;padding:11px 12px;font-size:12px;line-height:1.65;color:#66542b}.guide-note b{color:#755a13}
+    @media(max-width:680px){.flow{grid-template-columns:1fr;gap:8px}.arrow{transform:rotate(90deg);justify-self:center}.guide{padding:16px 14px}.guide-toggle{padding:14px 15px}}
+    @media(max-width:680px){.wrap{padding:18px 14px 32px}.head h1{font-size:23px}.grid{grid-template-columns:1fr}.card{min-height:150px;padding:18px}.icon{margin-bottom:10px}.subgrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+ <main class="wrap">
+  <header class="head"><h1>カトレア　経営者専用</h1><p>日々の運営状況を確認する管理ページ</p></header>
+  <div class="notice"><b>毎日の確認順：</b>① 退勤打刻　→　② テーブルの滞留・会計状況　→　③ 厨房の未提供注文<br><b>月末：</b>月集計・銀行入金額を確認。<br><b>注意：</b>詳細確認ページでは、<b>緑色のボタンを絶対に押さないでください。</b><br><b>カウントアプリ：</b>入力するとデータが保存されるため、<b>打ち込まないでください。</b><br><b>注文練習・シフトアプリ：</b>データは保存されないため、自由に操作・入力できます。</div>
+  <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="false" aria-controls="systemGuide">このページの仕組みを読む <span id="guideMark">＋</span></button>
+  <section class="guide" id="systemGuide" aria-hidden="true">
+   <h2>注文から会計までの流れ</h2>
+   <p class="lead">カトレアのシステムは、注文・厨房・レジがテーブル番号でつながっています。基本はこの3つだけです。</p>
+   <div class="flow">
+    <div class="flow-step"><div class="flow-icon">📱</div><h3>① 注文アプリ</h3><p>ホールがテーブル番号を選び、注文を入力して送信します。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">🍳</div><h3>② 厨房画面</h3><p>送信した注文が厨房に届きます。提供すると、その注文は画面から消えます。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">🧾</div><h3>③ レジ・会計</h3><p>テーブル番号を押すと、そのテーブルの注文内容と会計金額が表示されます。</p></div>
+   </div>
+   <div class="guide-note"><b>練習すると分かりやすいです。</b><br>注文の入力は「注文練習アプリ」で自由に試せます。送信しても実際の店のデータには保存されません。<br><br><b>厨房モニターとテーブル状況は、現在の店内データです。</b><br>実際に注文が入るたび画面が変わります。厨房モニターでは、未提供の注文が残っていないか確認できます。テーブル状況では、現在の来客・使用中テーブル・会計前の状況を確認できます。</div>
+  </section>
+  <section class="grid">
+   <a class="card" href="https://timecard-exec.vercel.app/" target="_blank" rel="noopener"><div class="icon">🕘</div><div class="tag">ATTENDANCE</div><h2>退勤確認</h2><p>スタッフの出退勤状況、勤務時間、給与データを確認します。</p></a>
+   <a class="card" href="https://timecard-exec.vercel.app/tables.html" target="_blank" rel="noopener"><div class="icon">▦</div><div class="tag">TABLE STATUS</div><h2>テーブル状況</h2><p>着席中・空席・会計前のテーブル状況を確認します。</p></a>
+   <a class="card" href="https://cattleya-order.vercel.app/kitchen.html" target="_blank" rel="noopener"><div class="icon">🍳</div><div class="tag">KITCHEN</div><h2>厨房モニター</h2><p>未提供の注文、提供待ちの状況を確認します。</p></a>
+   <a class="card" href="https://cattleya-order.vercel.app/Monthly.html" target="_blank" rel="noopener"><div class="icon">▤</div><div class="tag">MONTHLY REPORT</div><h2>月集計・銀行入金額</h2><p>月ごとの売上集計と、銀行への入金額を確認します。</p></a>
+   <a class="card warning" href="https://cattleya-order.vercel.app/Analytics.html" target="_blank" rel="noopener"><div class="icon">⌁</div><div class="tag">DETAIL ANALYTICS</div><h2>詳細確認</h2><p><b>緑色のボタンは絶対に押さないでください。</b><br>売上・注文データの詳細確認用です。</p></a>
+   <a class="card warning" href="https://cattleya-order.vercel.app/Cash.html" target="_blank" rel="noopener"><div class="icon">#</div><div class="tag">COUNT APP</div><h2>カウントアプリ</h2><p><b>打ち込まないでください。</b><br>入力内容がそのままデータとして保存されます。確認のみ行ってください。</p></a>
+   <a class="card practice" href="https://cattleya-order.vercel.app/practice.html" target="_blank" rel="noopener"><div class="icon">✎</div><div class="tag">ORDER PRACTICE</div><h2>注文練習アプリ</h2><p>データは保存されません。自由に打ち込み、送信して練習してください。</p></a>
+   <a class="card practice" href="https://timecard-owner.vercel.app/shift.html" target="_blank" rel="noopener"><div class="icon">▤</div><div class="tag">SHIFT SIMULATOR</div><h2>シフトアプリ</h2><p>データは保存されません。自由にシフトを考え、理想のシフトが完成したらスクリーンショットを共有してください。</p></a>
+  </section>
+  <div class="section">確認の目安</div>
+  <section class="subgrid">
+   <div class="subcard"><h3>営業中</h3><p>テーブルの長時間滞在、厨房の未提供注文が残っていないかを確認。</p></div>
+   <div class="subcard"><h3>閉店後</h3><p>全員の退勤打刻、厨房注文の完了、テーブルの会計漏れを確認。</p></div>
+  </section>
+  <div class="footer">Lounge Cattleya　Management Dashboard</div>
+ </main>
+<script>
+  const guideToggle = document.getElementById('guideToggle');
+  const systemGuide = document.getElementById('systemGuide');
+  const guideMark = document.getElementById('guideMark');
+  guideToggle.addEventListener('click', () => {
+    const open = systemGuide.classList.toggle('open');
+    guideToggle.setAttribute('aria-expanded', String(open));
+    systemGuide.setAttribute('aria-hidden', String(!open));
+    guideMark.textContent = open ? '－' : '＋';
+  });
+</script>
+</body>
+</html>
