@@ -418,8 +418,8 @@ function openModal(tableNo, orders) {
   // 注文をメニュー名でまとめる
   const grouped = {};
   orders.forEach(o => {
-    const key = o.menu_name;
-    if (!grouped[key]) grouped[key] = { name: o.menu_name, qty: 0, unitPrice: o.price || 0, time: o.created_at };
+    const key = o.item_name;
+    if (!grouped[key]) grouped[key] = { name: o.item_name, qty: 0, unitPrice: o.price || 0, time: o.created_at };
     grouped[key].qty += 1;
   });
 
