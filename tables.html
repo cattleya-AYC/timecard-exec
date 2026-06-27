@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>テーブル状況 | カトレア</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f0f0f;
+    color: #f0f0f0;
+    font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #fff;
+  }
+
+  #last-updated {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    padding: 12px 20px;
+    background: #141414;
+    border-bottom: 1px solid #222;
+    font-size: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #999;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot-occupied { background: #c9a227; }
+  .dot-empty { background: #333; border: 1px solid #444; }
+
+  .section-label {
+    padding: 16px 20px 8px;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .table-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    padding: 0 16px 16px;
+  }
+
+  .table-card {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    border: 1.5px solid #2a2a2a;
+    background: #1c1c1c;
+    transition: transform 0.15s;
+    position: relative;
+    user-select: none;
+  }
+
+  .table-card.occupied {
+    background: #1e1700;
+    border-color: #c9a227;
+    box-shadow: 0 0 14px rgba(201,162,39,0.25);
+    cursor: pointer;
+    animation: glow-pulse 2.5s ease-in-out infinite;
+  }
+
+  .table-card.occupied:active {
+    transform: scale(0.95);
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(201,162,39,0.2); }
+    50% { box-shadow: 0 0 22px rgba(201,162,39,0.45); }
+  }
+
+  .table-number {
+    font-size: 26px;
+    font-weight: 800;
+    color: #444;
+    line-height: 1;
+  }
+
+  .table-card.occupied .table-number {
+    color: #e8c040;
+  }
+
+  .table-pax {
+    font-size: 11px;
+    color: #c9a227;
+    margin-top: 4px;
+  }
+
+  .table-amount {
+    font-size: 11px;
+    color: #a07a10;
+    margin-top: 2px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: #1a1a1a;
+    border-radius: 18px 18px 0 0;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 0 0 40px;
+    border-top: 1px solid #2a2a2a;
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+
+  .modal-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #242424;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .modal-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #e8c040;
+  }
+
+  .modal-pax {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 0 0 16px;
+    line-height: 1;
+  }
+
+  .order-list {
+    padding: 12px 20px;
+  }
+
+  .order-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #242424;
+    gap: 8px;
+  }
+
+  .order-row:last-child {
+    border-bottom: none;
+  }
+
+  .order-name {
+    font-size: 15px;
+    color: #ddd;
+    flex: 1;
+  }
+
+  .order-qty {
+    font-size: 13px;
+    color: #888;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .order-price {
+    font-size: 14px;
+    color: #aaa;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .order-time {
+    font-size: 11px;
+    color: #555;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  .modal-total {
+    margin: 4px 20px 0;
+    padding: 14px 0 0;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .modal-total-label {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .modal-total-amount {
+    font-size: 28px;
+    font-weight: 800;
+    color: #e8c040;
+  }
+
+  .modal-total-amount span {
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    margin-left: 2px;
+  }
+
+  .empty-note {
+    padding: 20px;
+    color: #555;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* Loading */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #555;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌸 テーブル状況</h1>
+  <span id="last-updated">読み込み中...</span>
+</header>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot dot-occupied"></div>
+    <span>着席中（タップで詳細）</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot dot-empty"></div>
+    <span>空席</span>
+  </div>
+</div>
+
+<div id="tables-container">
+  <div class="loading">読み込み中...</div>
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-table-name">-</div>
+        <div class="modal-pax" id="modal-pax"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="order-list" id="modal-orders"></div>
+    <div class="modal-total">
+      <span class="modal-total-label">合計</span>
+      <span class="modal-total-amount" id="modal-total">¥0<span>（税込）</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== Supabase設定 ==========
+const SUPABASE_URL = "https://zxdgiszrsmumjjxmvszb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZGdpc3pyc211bWpqeG12c3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA2MTExMzEsImV4cCI6MjA0NjE4NzEzMX0.1mMDMBRSMuKDOSB1lGQmFr1dk-WNChZgopJbgPImxPU";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ========== テーブル定義 ==========
+const TABLE_IDS = [
+  "1","2","3","4","5","6","7","8","9","10",
+  "11","12","13","14","15",
+  "A","B","C","D","E","F","G",
+  "K","O"
+];
+
+// ========== 状態 ==========
+let occupiedData = {}; // { table_no: [ orders ] }
+
+// ========== データ取得 ==========
+async function fetchOrders() {
+  const today = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Tokyo" }).split(" ")[0];
+  const { data, error } = await db
+    .from("orders")
+    .select("*")
+    .eq("status", "pending")
+    .gte("created_at", today + "T00:00:00+09:00")
+    .lte("created_at", today + "T23:59:59+09:00");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  // テーブルごとにグループ化
+  occupiedData = {};
+  (data || []).forEach(order => {
+    const t = String(order.table_no);
+    if (!occupiedData[t]) occupiedData[t] = [];
+    occupiedData[t].push(order);
+  });
+
+  renderTables();
+  updateTimestamp();
+}
+
+// ========== 描画 ==========
+function renderTables() {
+  const container = document.getElementById("tables-container");
+
+  // 数字テーブル（1-15）
+  const numTables = TABLE_IDS.filter(t => !isNaN(t));
+  // アルファベットテーブル
+  const alphaTables = TABLE_IDS.filter(t => isNaN(t));
+
+  container.innerHTML = `
+    <div class="section-label">テーブル席</div>
+    <div class="table-grid" id="grid-num"></div>
+    <div class="section-label">カウンター席</div>
+    <div class="table-grid" id="grid-alpha"></div>
+  `;
+
+  numTables.forEach(t => {
+    document.getElementById("grid-num").appendChild(makeCard(t));
+  });
+  alphaTables.forEach(t => {
+    document.getElementById("grid-alpha").appendChild(makeCard(t));
+  });
+}
+
+function makeCard(tableNo) {
+  const orders = occupiedData[tableNo] || [];
+  const isOccupied = orders.length > 0;
+
+  const card = document.createElement("div");
+  card.className = "table-card" + (isOccupied ? " occupied" : "");
+
+  const total = orders.reduce((sum, o) => sum + (o.price || 0), 0);
+  const pax = orders.length > 0 ? (orders[0].people_count || "") : "";
+
+  card.innerHTML = `
+    <div class="table-number">${tableNo}</div>
+    ${isOccupied ? `<div class="table-pax">${pax ? pax + "名" : ""}</div>` : ""}
+    ${isOccupied ? `<div class="table-amount">¥${total.toLocaleString()}</div>` : ""}
+  `;
+
+  if (isOccupied) {
+    card.onclick = () => openModal(tableNo, orders);
+  }
+
+  return card;
+}
+
+// ========== モーダル ==========
+function openModal(tableNo, orders) {
+  document.getElementById("modal-table-name").textContent = "テーブル " + tableNo;
+
+  const pax = orders[0]?.people_count;
+  document.getElementById("modal-pax").textContent = pax ? pax + "名" : "";
+
+  // 注文をメニュー名でまとめる
+  const grouped = {};
+  orders.forEach(o => {
+    const key = o.menu_name;
+    if (!grouped[key]) grouped[key] = { name: o.menu_name, qty: 0, unitPrice: o.price || 0, time: o.created_at };
+    grouped[key].qty += 1;
+  });
+
+  const listEl = document.getElementById("modal-orders");
+  listEl.innerHTML = "";
+
+  Object.values(grouped).forEach(item => {
+    const timeStr = item.time ? new Date(item.time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tokyo" }) : "";
+    const row = document.createElement("div");
+    row.className = "order-row";
+    row.innerHTML = `
+      <span class="order-name">${item.name}</span>
+      <span class="order-qty">×${item.qty}</span>
+      <span class="order-price">¥${(item.unitPrice * item.qty).toLocaleString()}</span>
+      <span class="order-time">${timeStr}</span>
+    `;
+    listEl.appendChild(row);
+  });
+
+  const total = orders.reduce((sum, o) => sum + (o.price || 0), 0);
+  document.getElementById("modal-total").innerHTML = `¥${total.toLocaleString()}<span>（税込）</span>`;
+
+  document.getElementById("modal-overlay").classList.add("open");
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").classList.remove("open");
+}
+
+// オーバーレイ外タップで閉じる
+document.getElementById("modal-overlay").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ========== タイムスタンプ ==========
+function updateTimestamp() {
+  const now = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tokyo" });
+  document.getElementById("last-updated").textContent = now + " 更新";
+}
+
+// ========== リアルタイム購読 ==========
+db.channel("tables-view")
+  .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+    fetchOrders();
+  })
+  .subscribe();
+
+// ========== 初回読み込み ==========
+fetchOrders();
+</script>
+</body>
+</html>
