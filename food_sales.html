@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スイーツ・フード 日別売上</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif; background: #0f1a14; color: #e8dcc8; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1A3C34 0%, #0f1a14 100%); border-bottom: 1px solid #C9A84C44; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .header-title { display: flex; align-items: center; gap: 12px; }
+  .logo-mark { width: 36px; height: 36px; border: 2px solid #C9A84C; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #C9A84C; font-weight: bold; }
+  h1 { font-size: 18px; font-weight: 600; color: #e8dcc8; letter-spacing: 0.05em; }
+  h1 span { color: #C9A84C; font-size: 13px; display: block; font-weight: 400; letter-spacing: 0.1em; }
+  .month-nav { display: flex; align-items: center; gap: 8px; }
+  .month-nav button { background: #1A3C34; border: 1px solid #C9A84C55; color: #C9A84C; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .month-nav button:hover { background: #254d40; }
+  #monthLabel { font-size: 16px; font-weight: 600; color: #C9A84C; min-width: 90px; text-align: center; letter-spacing: 0.05em; }
+  .tabs { display: flex; padding: 16px 24px 0; border-bottom: 1px solid #1A3C34; }
+  .tab { padding: 10px 20px; cursor: pointer; font-size: 14px; color: #8a9e94; border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.05em; }
+  .tab.active { color: #C9A84C; border-bottom-color: #C9A84C; }
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 20px 24px 0; }
+  .card { background: #1A3C34; border: 1px solid #2a5242; border-radius: 10px; padding: 14px 16px; }
+  .card-label { font-size: 11px; color: #8a9e94; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .card-value { font-size: 17px; font-weight: 700; color: #C9A84C; }
+  .section { padding: 20px 24px; }
+  .section-title { font-size: 13px; letter-spacing: 0.12em; color: #C9A84C; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section-title::before { content: ''; display: block; width: 3px; height: 14px; background: #C9A84C; border-radius: 2px; }
+  .chart-wrap { background: #1A3C34; border: 1px solid #2a5242; border-radius: 10px; padding: 16px; margin-bottom: 20px; position: relative; height: 240px; }
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #2a5242; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: #1A3C34; }
+  th { padding: 10px 12px; text-align: right; font-weight: 600; color: #C9A84C; font-size: 11px; letter-spacing: 0.08em; white-space: nowrap; border-bottom: 1px solid #2a5242; }
+  th:first-child { text-align: left; }
+  tbody tr { border-bottom: 1px solid #1e3028; transition: background 0.15s; }
+  tbody tr:hover { background: #1A3C3466; }
+  tbody tr:last-child { border-bottom: none; }
+  td { padding: 9px 12px; text-align: right; color: #cdc2ad; white-space: nowrap; }
+  td:first-child { text-align: left; font-weight: 600; color: #e8dcc8; }
+  td.zero { color: #3a5248; }
+  tfoot tr { background: #162e22; }
+  tfoot td { font-weight: 700; color: #C9A84C; border-top: 1px solid #C9A84C44; padding: 10px 12px; }
+  .menu-section { margin-top: 20px; }
+  .loading { text-align: center; padding: 60px 24px; color: #8a9e94; font-size: 14px; }
+  .loading-spinner { width: 32px; height: 32px; border: 3px solid #1A3C34; border-top-color: #C9A84C; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { text-align: center; padding: 40px 24px; color: #c97a7a; font-size: 14px; line-height: 1.8; }
+  #content { display: none; }
+  .highlight { color: #C9A84C; font-weight: 700; }
+  @media (max-width: 480px) {
+    header { padding: 14px 16px; }
+    .tabs { padding: 12px 16px 0; }
+    .summary-cards { padding: 14px 16px 0; gap: 8px; }
+    .section { padding: 14px 16px; }
+    .tab { padding: 8px 14px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <div class="logo-mark">C</div>
+    <h1>スイーツ・フード売上<span>LOUNGE CATTLEYA</span></h1>
+  </div>
+  <div class="month-nav">
+    <button id="prevMonth">&#8249;</button>
+    <div id="monthLabel"></div>
+    <button id="nextMonth">&#8250;</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="sweets">🍰 スイーツ</div>
+  <div class="tab" data-tab="food">🍞 フード</div>
+  <div class="tab" data-tab="both">📊 合計</div>
+</div>
+
+<div id="loading" class="loading">
+  <div class="loading-spinner"></div>
+  データを読み込み中...
+</div>
+<div id="errorMsg" class="error" style="display:none"></div>
+
+<div id="content">
+  <div class="summary-cards" id="summaryCards"></div>
+  <div class="section">
+    <div class="section-title">日別売上推移</div>
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+    </div>
+    <div class="section-title">日別明細</div>
+    <div class="table-wrap">
+      <table>
+        <thead id="dailyHead"></thead>
+        <tbody id="dailyBody"></tbody>
+        <tfoot id="dailyFoot"></tfoot>
+      </table>
+    </div>
+    <div class="menu-section">
+      <div class="section-title">メニュー別集計</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>メニュー</th><th>注文数</th><th>売上合計</th></tr></thead>
+          <tbody id="menuBody"></tbody>
+          <tfoot id="menuFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://zxdgiszrsmumjjxmvszb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_LLIkeICkSI-IS-2xMKO9_A_I8MAo2IT';
+
+const SWEETS = ['ガトーショコラ','コーヒーゼリー','チーズケーキ','バニラアイスクリーム','フォンダンショコラ','ミルクレープ','栗のモンブラン','紅茶のシフォン'];
+const FOOD_ITEMS = ['トースト（バター＆ジャム）','トーストサンド（たまご）','トーストサンド（ハム）','トーストサンド（ミックス）','ハムサンド','ピザトースト','ミックスサンド','玉子サンド','野菜サンド'];
+const MORNING_LABEL = 'モーニング（計）';
+
+let currentYear, currentMonth, chartInstance = null, currentTab = 'sweets', allData = [];
+
+const now = new Date();
+currentYear = now.getFullYear();
+currentMonth = now.getMonth() + 1;
+
+function fmt(n) { return n === 0 ? '-' : '¥' + n.toLocaleString(); }
+function fmtNum(n) { return n === 0 ? '-' : n.toLocaleString(); }
+function updateMonthLabel() { document.getElementById('monthLabel').textContent = currentYear + '年' + currentMonth + '月'; }
+
+async function fetchData(year, month) {
+  const pad = n => String(n).padStart(2, '0');
+  const startDate = year + '-' + pad(month) + '-01';
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = year + '-' + pad(month) + '-' + pad(lastDay);
+
+  const url = SUPABASE_URL + '/rest/v1/order_items?select=item_name,price,qty,sale_date&sale_date=gte.' + startDate + '&sale_date=lte.' + endDate + '&limit=5000';
+
+  const r = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    }
+  });
+
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error(r.status + ' ' + txt);
+  }
+
+  const data = await r.json();
+  const allNames = new Set([...SWEETS, ...FOOD_ITEMS]);
+
+  return data
+    .filter(row => allNames.has(row.item_name) || (row.item_name && row.item_name.indexOf('モーニング') === 0))
+    .map(row => ({ ...row, _morning: row.item_name.indexOf('モーニング') === 0 }));
+}
+
+function getDays(year, month) {
+  const pad = n => String(n).padStart(2, '0');
+  const days = [];
+  const last = new Date(year, month, 0).getDate();
+  for (let d = 1; d <= last; d++) days.push(year + '-' + pad(month) + '-' + pad(d));
+  return days;
+}
+
+function categorize(item) {
+  if (item._morning) return 'food';
+  if (SWEETS.includes(item.item_name)) return 'sweets';
+  if (FOOD_ITEMS.includes(item.item_name)) return 'food';
+  return null;
+}
+
+function menuName(item) { return item._morning ? MORNING_LABEL : item.item_name; }
+
+function render() {
+  const days = getDays(currentYear, currentMonth);
+  const filtered = currentTab === 'sweets' ? allData.filter(r => categorize(r) === 'sweets')
+    : currentTab === 'food' ? allData.filter(r => categorize(r) === 'food')
+    : allData.filter(r => categorize(r) !== null);
+
+  const dailyMap = {};
+  days.forEach(d => dailyMap[d] = { amount: 0, qty: 0 });
+  const menuMap = {};
+
+  filtered.forEach(row => {
+    const amt = row.price * row.qty;
+    if (dailyMap[row.sale_date] !== undefined) {
+      dailyMap[row.sale_date].amount += amt;
+      dailyMap[row.sale_date].qty += row.qty;
+    }
+    const mn = menuName(row);
+    if (!menuMap[mn]) menuMap[mn] = { qty: 0, amount: 0 };
+    menuMap[mn].qty += row.qty;
+    menuMap[mn].amount += amt;
+  });
+
+  const totalAmount = Object.values(dailyMap).reduce((s, v) => s + v.amount, 0);
+  const totalQty = Object.values(dailyMap).reduce((s, v) => s + v.qty, 0);
+  const activeDays = Object.values(dailyMap).filter(v => v.amount > 0).length;
+  const avgPerDay = activeDays > 0 ? Math.round(totalAmount / activeDays) : 0;
+  const tabLabel = currentTab === 'sweets' ? 'スイーツ' : currentTab === 'food' ? 'フード' : '合計';
+
+  document.getElementById('summaryCards').innerHTML =
+    '<div class="card"><div class="card-label">月間売上 ' + tabLabel + '</div><div class="card-value">' + fmt(totalAmount) + '</div></div>' +
+    '<div class="card"><div class="card-label">総注文数</div><div class="card-value">' + totalQty + '点</div></div>' +
+    '<div class="card"><div class="card-label">販売日数</div><div class="card-value">' + activeDays + '日</div></div>' +
+    '<div class="card"><div class="card-label">日平均売上</div><div class="card-value">' + fmt(avgPerDay) + '</div></div>';
+
+  const chartLabels = days.map(d => parseInt(d.split('-')[2]) + '日');
+  const chartData = days.map(d => dailyMap[d].amount);
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(document.getElementById('mainChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [{ label: '売上', data: chartData,
+        backgroundColor: chartData.map(v => v > 0 ? '#C9A84C88' : '#1A3C34'),
+        borderColor: chartData.map(v => v > 0 ? '#C9A84C' : '#2a5242'),
+        borderWidth: 1, borderRadius: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '¥' + ctx.raw.toLocaleString() } } },
+      scales: {
+        x: { ticks: { color: '#8a9e94', font: { size: 10 }, maxRotation: 0, callback: (v, i) => i % 5 === 0 || i === days.length - 1 ? chartLabels[i] : '' }, grid: { color: '#1e3028' } },
+        y: { ticks: { color: '#8a9e94', font: { size: 10 }, callback: v => v === 0 ? '0' : '¥' + (v >= 1000 ? Math.round(v/1000) + 'k' : v) }, grid: { color: '#1e3028' } }
+      }
+    }
+  });
+
+  if (currentTab === 'both') {
+    const sm = {}, fm = {};
+    days.forEach(d => { sm[d] = 0; fm[d] = 0; });
+    allData.forEach(row => {
+      const cat = categorize(row);
+      if (sm[row.sale_date] !== undefined) {
+        if (cat === 'sweets') sm[row.sale_date] += row.price * row.qty;
+        if (cat === 'food') fm[row.sale_date] += row.price * row.qty;
+      }
+    });
+    document.getElementById('dailyHead').innerHTML = '<tr><th>日付</th><th>スイーツ</th><th>フード</th><th>合計</th></tr>';
+    let rows = '', ts = 0, tf = 0;
+    days.forEach(d => {
+      const sv = sm[d], fv = fm[d], tot = sv + fv;
+      ts += sv; tf += fv;
+      const dd = parseInt(d.split('-')[2]);
+      rows += '<tr><td>' + currentMonth + '/' + dd + '</td><td class="' + (sv === 0 ? 'zero' : '') + '">' + fmt(sv) + '</td><td class="' + (fv === 0 ? 'zero' : '') + '">' + fmt(fv) + '</td><td class="' + (tot === 0 ? 'zero' : 'highlight') + '">' + fmt(tot) + '</td></tr>';
+    });
+    document.getElementById('dailyBody').innerHTML = rows;
+    document.getElementById('dailyFoot').innerHTML = '<tr><td>合計</td><td>' + fmt(ts) + '</td><td>' + fmt(tf) + '</td><td>' + fmt(ts + tf) + '</td></tr>';
+  } else {
+    document.getElementById('dailyHead').innerHTML = '<tr><th>日付</th><th>注文数</th><th>売上</th></tr>';
+    let rows = '';
+    days.forEach(d => {
+      const v = dailyMap[d], dd = parseInt(d.split('-')[2]);
+      rows += '<tr><td>' + currentMonth + '/' + dd + '</td><td class="' + (v.qty === 0 ? 'zero' : '') + '">' + fmtNum(v.qty) + '</td><td class="' + (v.amount === 0 ? 'zero' : 'highlight') + '">' + fmt(v.amount) + '</td></tr>';
+    });
+    document.getElementById('dailyBody').innerHTML = rows;
+    document.getElementById('dailyFoot').innerHTML = '<tr><td>合計</td><td>' + totalQty + '</td><td>' + fmt(totalAmount) + '</td></tr>';
+  }
+
+  const sortedMenus = Object.entries(menuMap).sort((a, b) => b[1].amount - a[1].amount);
+  document.getElementById('menuBody').innerHTML = sortedMenus.length
+    ? sortedMenus.map(([name, v]) => '<tr><td>' + name + '</td><td>' + v.qty + '</td><td class="highlight">' + fmt(v.amount) + '</td></tr>').join('')
+    : '<tr><td colspan="3" style="text-align:center;color:#3a5248;padding:20px">データなし</td></tr>';
+  document.getElementById('menuFoot').innerHTML = '<tr><td>合計</td><td>' + totalQty + '</td><td>' + fmt(totalAmount) + '</td></tr>';
+}
+
+async function load() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('errorMsg').style.display = 'none';
+  try {
+    allData = await fetchData(currentYear, currentMonth);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    render();
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('errorMsg').innerHTML = 'エラー: ' + e.message + '<br><small style="color:#aaa">このメッセージをまりさんに教えてください</small>';
+  }
+}
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+  currentMonth--; if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+  updateMonthLabel(); load();
+});
+document.getElementById('nextMonth').addEventListener('click', () => {
+  currentMonth++; if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+  updateMonthLabel(); load();
+});
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab = tab.dataset.tab;
+    render();
+  });
+});
+
+updateMonthLabel();
+load();
+</script>
+</body>
+</html>
