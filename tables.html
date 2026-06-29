@@ -347,13 +347,10 @@ let occupiedData = {}; // { table_no: [ orders ] }
 
 // ========== データ取得 ==========
 async function fetchOrders() {
-  const today = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Tokyo" }).split(" ")[0];
   const { data, error } = await db
     .from("orders")
     .select("*")
-    .eq("status", "pending")
-    .gte("created_at", today + "T00:00:00+09:00")
-    .lte("created_at", today + "T23:59:59+09:00");
+    .in("status", ["pending", "served"]);
 
   if (error) {
     console.error(error);
@@ -392,8 +389,9 @@ function makeCard(tableNo) {
   const card = document.createElement("div");
   card.className = "table-card" + (isOccupied ? " occupied" : "");
 
-  const total = orders.reduce((sum, o) => sum + (o.price || 0), 0);
-  const pax = orders.length > 0 ? (orders[0].people_count || "") : "";
+  const total = orders.filter(o => !o.item_name.startsWith("【人数")).reduce((sum, o) => sum + (o.price || 0) * (o.qty || 1), 0);
+  const infoOrder = orders.find(o => o.status === "info");
+  const pax = infoOrder ? infoOrder.item_name.replace("【人数：", "").replace("名】", "") : "";
 
   card.innerHTML = `
     <div class="table-number">${tableNo}</div>
